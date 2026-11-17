@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Recuento de Alcancías - TeleMaratón</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #0b2545;
+            --secondary-color: #134074;
+            --accent-color: #ee6c4d;
+            --success-color: #2b9348;
+            --bg-color: #f4f9f9;
+            --table-header: #134074;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .header h2 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+        .form-number {
+            color: #d90429;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .section-title {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+            margin: 12px 0 6px 0;
+            text-transform: uppercase;
+        }
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 6px;
+            margin-bottom: 6px;
+            align-items: center;
+        }
+        .grid-row label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+        }
+        input[type="text"], input[type="date"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.8rem;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 4px rgba(19, 64, 116, 0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        th {
+            background-color: var(--table-header);
+            color: white;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+        td input {
+            text-align: center;
+            font-weight: bold;
+            padding: 3px;
+        }
+        .total-row {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        .total-row td {
+            color: white;
+        }
+        .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .signature-box {
+            border: 1px solid var(--secondary-color);
+            border-radius: 5px;
+            padding: 8px;
+            background: #fafafa;
+        }
+        .signature-box h4 {
+            margin: 0 0 8px 0;
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            background: #e2eafc;
+            padding: 3px;
+            border-radius: 3px;
+        }
+        .signature-field {
+            margin-top: 6px;
+        }
+        .btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        button {
+            border: none;
+            padding: 7px 14px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        .btn-print { background-color: var(--primary-color); }
+        .btn-save { background-color: var(--success-color); }
+        .btn-export { background-color: #3a86ff; }
+        .btn-new { background-color: #6c757d; }
+        
+        .historial-section {
+            margin-top: 25px;
+            border-top: 2px dashed #ccc;
+            padding-top: 12px;
+        }
+        .search-box {
+            margin-bottom: 8px;
+        }
+        .badge-total {
+            background: var(--accent-color);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .pagination button {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            background-color: var(--secondary-color);
+        }
+
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; width: 100%; }
+            .btn-container, .historial-section, .no-print { display: none !important; }
+            input, select, textarea { border: none; background: transparent !important; resize: none; appearance: none; }
+            table th { background-color: #134074 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .total-row { background-color: #0b2545 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .signature-box h4 { background-color: #e2eafc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Formulario de Recuento de Alcancías - TeleMaratón</h2>
+        <div class="form-number">Nº <span id="nroFormulario">000003</span></div>
+    </div>
+
+    <!-- Datos Generales -->
+    <div class="grid-row">
+        <label>Institución:</label>
+        <input type="text" id="institucion" placeholder="Nombre de la institución o establecimiento">
+    </div>
+    <div class="grid-row">
+        <label>Entregado por:</label>
+        <input type="text" id="entregadoPor" placeholder="Nombre de la persona que entrega">
+    </div>
+    <div class="grid-row">
+        <label>Código de alcancía:</label>
+        <input type="text" id="codigoAlcancia" placeholder="Ej. ALC-001">
+    </div>
+    <div class="grid-row">
+        <label>Fecha:</label>
+        <input type="date" id="fechaRecuento">
+    </div>
+    <div class="grid-row">
+        <label>Lugar de recuento:</label>
+        <input type="text" id="lugarRecuento" placeholder="Ciudad / Oficina / Sede">
+    </div>
+
+    <!-- Detalle del Recuento -->
+    <div class="section-title">I. Detalle del Recuento</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Denominación (Bs.)</th>
+                <th>Cantidad de Piezas</th>
+                <th>Importe (Bs.)</th>
+            </tr>
+        </thead>
+        <tbody id="tablaDenominaciones"></tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right;">TOTAL Bs. / $US:</td>
+                <td id="totalGeneral">0.00</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Resumen y Observaciones -->
+    <div class="grid-row">
+        <label>Importe total en literal:</label>
+        <input type="text" id="importeLiteral" placeholder="Se completará automáticamente" readonly style="background-color: #e9ecef;">
+    </div>
+    <div class="grid-row">
+        <label>Destino de los fondos:</label>
+        <input type="text" id="destinoFondos" value="Recaudación de la telemaratón">
+    </div>
+    <div class="grid-row">
+        <label>Observaciones:</label>
+        <textarea id="observaciones" rows="1" placeholder="Observaciones adicionales..."></textarea>
+    </div>
+
+    <!-- Responsable y Validador -->
+    <div class="signatures-grid">
+        <div class="signature-box">
+            <h4>Responsable del Recuento</h4>
+            <div class="signature-field">
+                <label style="font-size: 0.75rem;">Usuario:</label>
+                <select id="responsableRecuento">
+                    <option value="">Seleccione usuario...</option>
+                    <option value="Usuario 1">Usuario 1</option>
+                    <option value="Usuario 2">Usuario 2</option>
+                    <option value="Usuario 3">Usuario 3</option>
+                    <option value="Usuario 4">Usuario 4</option>
+                    <option value="Usuario 5">Usuario 5</option>
+                    <option value="Usuario 6">Usuario 6</option>
+                    <option value="Usuario 7">Usuario 7</option>
+                    <option value="Usuario 8">Usuario 8</option>
+                    <option value="Usuario 9">Usuario 9</option>
+                    <option value="Usuario 10">Usuario 10</option>
+                </select>
+            </div>
+        </div>
+        <div class="signature-box">
+            <h4>Validador del Recuento</h4>
+            <div class="signature-field">
+                <label style="font-size: 0.75rem;">Nombre / Firma:</label>
+                <input type="text" id="validadorRecuento" placeholder="Nombre del validador">
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción Formulario -->
+    <div class="btn-container">
+        <button type="button" class="btn-save" onclick="guardarAlcanciaEnGoogleSheets()">☁️ Guardar en Google Sheets</button>
+        <button type="button" class="btn-print" onclick="window.print()">🖨️ Imprimir Formulario</button>
+        <button type="button" class="btn-new" onclick="limpiarFormulario()">➕ Nuevo Recuento</button>
+    </div>
+
+    <!-- SECCIÓN DE HISTORIAL Y RESUMEN GENERAL -->
+    <div class="historial-section">
+        <div class="section-title" style="background-color: var(--accent-color);">Historial en Tiempo Real (Google Sheets)</div>
+        
+        <div class="search-box" style="display: flex; gap: 8px;">
+            <input type="text" id="inputBuscador" placeholder="🔍 Buscar por código, institución, responsable..." oninput="filtrarYRenderizarHistorial()">
+            <button type="button" onclick="cargarHistorialDesdeNube()" style="background-color: var(--secondary-color); padding: 5px 12px;">🔄 Sincronizar</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Cód. Alcancía</th>
+                    <th>Institución</th>
+                    <th>Responsable</th>
+                    <th>Fecha</th>
+                    <th>Total (Bs.)</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaHistorial">
+                <tr><td colspan="6" style="color: #777;">Cargando registros desde Google Sheets...</td></tr>
+            </tbody>
+            <tfoot>
+                <tr class="total-row" style="background-color: var(--secondary-color);">
+                    <td colspan="4" style="text-align: right;">RECAUDACIÓN TOTAL ACUMULADA:</td>
+                    <td id="historialTotalGeneral" colspan="2">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="pagination" id="contenedorPaginacion"></div>
+
+        <!-- DESGLOSE ESTADÍSTICO GENERAL POR DENOMINACIÓN -->
+        <div class="section-title" style="background-color: var(--primary-color); margin-top: 20px;">II. Desglose Estadístico General (Google Sheets)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Denominación (Bs.)</th>
+                    <th>Total Piezas Acumuladas</th>
+                    <th>Importe Total (Bs.)</th>
+                </tr>
+            </thead>
+            <tbody id="tablaEstadisticaGeneral"></tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td style="text-align: right;">TOTAL GENERAL:</td>
+                    <td id="estTotalPiezas">0</td>
+                    <td id="estTotalImporte">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="btn-container" style="margin-top: 12px;">
+            <button type="button" class="btn-export" onclick="exportarHistorialExcel()">📊 Exportar Historial a Excel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT (terminada en /exec)
+    const GOOGLE_SCRIPT_URL ="https://script.google.com/macros/s/AKfycbwAAOLNB2qC932AZiEDee7MaZvdbpw1ipb9YvTBKsMAW8BxcvXzwIe9EAsZhpgneAEY/exec";
+
+    const denominaciones = [0.10, 0.20, 0.50, 1.00, 2.00, 5.00, 10.00, 20.00, 50.00, 100.00, 200.00];
+    const tbody = document.getElementById('tablaDenominaciones');
+    let paginaActual = 1;
+    const registrosPorPagina = 10;
+    let historialRemoto = [];
+
+    denominaciones.forEach((den, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${den.toFixed(2)}</strong></td>
+            <td><input type="number" min="0" value="" placeholder="0" class="cantidad" data-index="${index}" data-den="${den}" oninput="calcularTotales()"></td>
+            <td><span class="importe-parcial" id="importe-${index}">0.00</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('fechaRecuento').valueAsDate = new Date();
+
+    function calcularTotales() {
+        let totalGeneral = 0;
+        const inputs = document.querySelectorAll('.cantidad');
+
+        inputs.forEach(input => {
+            const index = input.getAttribute('data-index');
+            const den = parseFloat(input.getAttribute('data-den'));
+            const cantidad = parseInt(input.value) || 0;
+            const importe = cantidad * den;
+
+            document.getElementById(`importe-${index}`).textContent = importe.toFixed(2);
+            totalGeneral += importe;
+        });
+
+        document.getElementById('totalGeneral').textContent = totalGeneral.toFixed(2);
+        document.getElementById('importeLiteral').value = `${totalGeneral.toFixed(2)} BOLIVIANOS`;
+        guardarBorradorActual();
+    }
+
+    function guardarBorradorActual() {
+        const cantidades = Array.from(document.querySelectorAll('.cantidad')).map(inp => inp.value);
+        const datos = {
+            institucion: document.getElementById('institucion').value,
+            entregadoPor: document.getElementById('entregadoPor').value,
+            codigoAlcancia: document.getElementById('codigoAlcancia').value,
+            fechaRecuento: document.getElementById('fechaRecuento').value,
+            lugarRecuento: document.getElementById('lugarRecuento').value,
+            destinoFondos: document.getElementById('destinoFondos').value,
+            observaciones: document.getElementById('observaciones').value,
+            responsableRecuento: document.getElementById('responsableRecuento').value,
+            validadorRecuento: document.getElementById('validadorRecuento').value,
+            cantidades: cantidades
+        };
+        localStorage.setItem('borradorRecuento', JSON.stringify(datos));
+    }
+
+    function cargarBorradorActual() {
+        const guardado = localStorage.getItem('borradorRecuento');
+        if (!guardado) return;
+        const datos = JSON.parse(guardado);
+        document.getElementById('institucion').value = datos.institucion || '';
+        document.getElementById('entregadoPor').value = datos.entregadoPor || '';
+        document.getElementById('codigoAlcancia').value = datos.codigoAlcancia || '';
+        if (datos.fechaRecuento) document.getElementById('fechaRecuento').value = datos.fechaRecuento;
+        document.getElementById('lugarRecuento').value = datos.lugarRecuento || '';
+        document.getElementById('destinoFondos').value = datos.destinoFondos || 'Recaudación de la telemaratón';
+        document.getElementById('observaciones').value = datos.observaciones || '';
+        document.getElementById('responsableRecuento').value = datos.responsableRecuento || '';
+        document.getElementById('validadorRecuento').value = datos.validadorRecuento || '';
+
+        const inputs = document.querySelectorAll('.cantidad');
+        if (datos.cantidades) {
+            inputs.forEach((inp, i) => { inp.value = datos.cantidades[i] || ''; });
+        }
+        calcularTotales();
+    }
+
+    function limpiarFormularioSinConfirmar() {
+        localStorage.removeItem('borradorRecuento');
+        document.querySelectorAll('input[type="text"], textarea, .cantidad').forEach(el => {
+            if (el.id !== 'destinoFondos' && el.id !== 'importeLiteral') el.value = '';
+        });
+        document.getElementById('responsableRecuento').value = '';
+        document.getElementById('fechaRecuento').valueAsDate = new Date();
+        calcularTotales();
+    }
+
+    function limpiarFormulario() {
+        Swal.fire({
+            title: '¿Nuevo recuento?',
+            text: 'Se limpiarán los campos actuales del formulario.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, limpiar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) limpiarFormularioSinConfirmar();
+        });
+    }
+
+    // --- CARGAR HISTORIAL DESDE GOOGLE SHEETS (GET) ---
+    async function cargarHistorialDesdeNube() {
+        if (GOOGLE_SCRIPT_URL.includes("TU_ID_DE_IMPLEMENTACION_AQUI")) {
+            return;
+        }
+
+        try {
+            const respuesta = await fetch(GOOGLE_SCRIPT_URL);
+            const resultado = await respuesta.json();
+            if (resultado.status === "success") {
+                historialRemoto = resultado.data;
+                filtrarYRenderizarHistorial();
+                actualizarEstadisticasGenerales();
+            }
+        } catch (error) {
+            console.error("Error al sincronizar con Google Sheets:", error);
+        }
+    }
+
+    async function guardarAlcanciaEnGoogleSheets() {
+        const codigo = document.getElementById('codigoAlcancia').value.trim();
+        if (!codigo) {
+            Swal.fire('Campo Requerido', 'Por favor, ingresa el "Código de alcancía" antes de guardar.', 'warning');
+            document.getElementById('codigoAlcancia').focus();
+            return;
+        }
+
+        const total = parseFloat(document.getElementById('totalGeneral').textContent) || 0;
+        const cantidades = Array.from(document.querySelectorAll('.cantidad')).map(inp => parseInt(inp.value) || 0);
+
+        const nuevaAlcancia = {
+            codigo: codigo,
+            institucion: document.getElementById('institucion').value,
+            entregadoPor: document.getElementById('entregadoPor').value,
+            fecha: document.getElementById('fechaRecuento').value,
+            lugar: document.getElementById('lugarRecuento').value,
+            observaciones: document.getElementById('observaciones').value,
+            responsable: document.getElementById('responsableRecuento').value,
+            validador: document.getElementById('validadorRecuento').value,
+            total: total,
+            cantidades: cantidades
+        };
+
+        if (GOOGLE_SCRIPT_URL.includes("TU_ID_DE_IMPLEMENTACION_AQUI")) {
+            Swal.fire('Falta configuración', 'Por favor pega tu URL de Google Apps Script en la variable GOOGLE_SCRIPT_URL.', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Guardando en Google Sheets...',
+            text: 'Actualizando la nube en tiempo real.',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevaAlcancia)
+            });
+
+            limpiarFormularioSinConfirmar();
+            await cargarHistorialDesdeNube(); // Sincroniza y muestra los datos nuevos inmediatamente
+
+            Swal.fire('¡Registrado!', `La alcancía ${codigo} se guardó correctamente en Google Sheets.`, 'success');
+        } catch (error) {
+            Swal.fire('Error de conexión', 'No se pudo guardar en Google Sheets.', 'error');
+        }
+    }
+
+    function filtrarYRenderizarHistorial() {
+        const textoBusqueda = document.getElementById('inputBuscador').value.toLowerCase();
+        const filtrados = historialRemoto.filter(item => 
+            String(item.codigo).toLowerCase().includes(textoBusqueda) ||
+            (item.institucion && String(item.institucion).toLowerCase().includes(textoBusqueda)) ||
+            (item.responsable && String(item.responsable).toLowerCase().includes(textoBusqueda)) ||
+            (item.entregadoPor && String(item.entregadoPor).toLowerCase().includes(textoBusqueda))
+        );
+
+        renderizarHistorialPaginado(filtrados);
+    }
+
+    function renderizarHistorialPaginado(historial) {
+        const tbodyHistorial = document.getElementById('tablaHistorial');
+        tbodyHistorial.innerHTML = '';
+
+        const sumaTotalGeneral = historialRemoto.reduce((acc, item) => acc + (parseFloat(item.total) || 0), 0);
+        document.getElementById('historialTotalGeneral').textContent = sumaTotalGeneral.toFixed(2) + ' Bs.';
+
+        if (historial.length === 0) {
+            tbodyHistorial.innerHTML = `<tr><td colspan="6" style="color: #777;">No se encontraron registros en Google Sheets.</td></tr>`;
+            document.getElementById('contenedorPaginacion').innerHTML = '';
+            return;
+        }
+
+        const totalPaginas = Math.ceil(historial.length / registrosPorPagina);
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        
+        const inicio = (paginaActual - 1) * registrosPorPagina;
+        const fin = inicio + registrosPorPagina;
+        const registrosPagina = historial.slice(inicio, fin);
+
+        registrosPagina.forEach((item) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.codigo}</strong></td>
+                <td>${item.institucion || '-'}</td>
+                <td>${item.responsable || '-'}</td>
+                <td>${item.fecha ? item.fecha.slice(0,10) : '-'}</td>
+                <td><span class="badge-total">${parseFloat(item.total).toFixed(2)} Bs.</span></td>
+                <td>
+                    <button type="button" style="background:#134074; padding:3px 6px; font-size:0.7rem;" onclick='cargarAlcanciaFormulario(${JSON.stringify(item)})' title="Cargar para imprimir">🖨️</button>
+                </td>
+            `;
+            tbodyHistorial.appendChild(tr);
+        });
+
+        let paginacionHTML = '';
+        if (totalPaginas > 1) {
+            paginacionHTML += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled style="opacity:0.5;"' : ''}>Anterior</button>`;
+            paginacionHTML += `<span style="font-size:0.8rem; font-weight:bold;">Pág. ${paginaActual} de ${totalPaginas}</span>`;
+            paginacionHTML += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled style="opacity:0.5;"' : ''}>Siguiente</button>`;
+        }
+        document.getElementById('contenedorPaginacion').innerHTML = paginacionHTML;
+    }
+
+    function cambiarPagina(nuevaPagina) {
+        paginaActual = nuevaPagina;
+        filtrarYRenderizarHistorial();
+    }
+
+    function actualizarEstadisticasGenerales() {
+        const tbodyEst = document.getElementById('tablaEstadisticaGeneral');
+        tbodyEst.innerHTML = '';
+
+        let totalPiezasPorDenom = new Array(denominaciones.length).fill(0);
+        let granTotalPiezas = 0;
+        let granTotalImporte = 0;
+
+        historialRemoto.forEach(item => {
+            if (item.cantidades) {
+                item.cantidades.forEach((cant, index) => {
+                    const piezas = parseInt(cant) || 0;
+                    totalPiezasPorDenom[index] += piezas;
+                });
+            }
+        });
+
+        denominaciones.forEach((den, index) => {
+            const piezas = totalPiezasPorDenom[index];
+            const importe = piezas * den;
+            granTotalPiezas += piezas;
+            granTotalImporte += importe;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${den.toFixed(2)}</strong></td>
+                <td>${piezas}</td>
+                <td>${importe.toFixed(2)}</td>
+            `;
+            tbodyEst.appendChild(tr);
+        });
+
+        document.getElementById('estTotalPiezas').textContent = granTotalPiezas;
+        document.getElementById('estTotalImporte').textContent = granTotalImporte.toFixed(2);
+    }
+
+    function cargarAlcanciaFormulario(item) {
+        document.getElementById('institucion').value = item.institucion || '';
+        document.getElementById('entregadoPor').value = item.entregadoPor || '';
+        document.getElementById('codigoAlcancia').value = item.codigo || '';
+        document.getElementById('fechaRecuento').value = item.fecha ? item.fecha.slice(0,10) : '';
+        document.getElementById('lugarRecuento').value = item.lugar || '';
+        document.getElementById('observaciones').value = item.observaciones || '';
+        document.getElementById('responsableRecuento').value = item.responsable || '';
+        document.getElementById('validadorRecuento').value = item.validador || '';
+
+        const inputs = document.querySelectorAll('.cantidad');
+        inputs.forEach((inp, i) => {
+            inp.value = item.cantidades[i] > 0 ? item.cantidades[i] : '';
+        });
+        calcularTotales();
+
+        Swal.fire({
+            title: 'Alcancia Cargada',
+            text: `Se han cargado los datos de la alcancía ${item.codigo} al formulario listo para imprimir.`,
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function exportarHistorialExcel() {
+        if (historialRemoto.length === 0) {
+            Swal.fire('Sin datos', 'No hay registros para exportar.', 'info');
+            return;
+        }
+
+        let filas = [
+            ['REPORTE GENERAL DE RECUENTO DE ALCANCÍAS - TELEMARATÓN'],
+            ['Código de Alcancía', 'Institución', 'Entregado Por', 'Fecha', 'Lugar', 'Responsable', 'Validador', 'Total Recaudado (Bs.)', 'Observaciones']
+        ];
+
+        let totalGral = 0;
+        historialRemoto.forEach(item => {
+            totalGral += parseFloat(item.total) || 0;
+            filas.push([
+                item.codigo,
+                `"${item.institucion || ''}"`,
+                `"${item.entregadoPor || ''}"`,
+                item.fecha ? item.fecha.slice(0,10) : '',
+                `"${item.lugar || ''}"`,
+                `"${item.responsable || ''}"`,
+                `"${item.validador || ''}"`,
+                parseFloat(item.total).toFixed(2),
+                `"${item.observaciones || ''}"`
+            ]);
+        });
+
+        filas.push([]);
+        filas.push(['TOTAL GENERAL ACUMULADO', '', '', '', '', '', '', totalGral.toFixed(2), '']);
+
+        const contenidoCSV = '\uFEFF' + filas.map(e => e.join(';')).join('\n');
+        const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = `Reporte_GoogleSheets_Alcancias_${new Date().toISOString().slice(0,10)}.csv`;
+        enlace.click();
+        URL.revokeObjectURL(url);
+    }
+
+    document.querySelector('.container').addEventListener('input', guardarBorradorActual);
+    document.getElementById('responsableRecuento').addEventListener('change', guardarBorradorActual);
+    
+    window.addEventListener('DOMContentLoaded', () => {
+        cargarBorradorActual();
+        cargarHistorialDesdeNube();
+    });
+</script>
+
+</body>
+</html>

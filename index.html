@@ -227,7 +227,11 @@
     </div>
     <div class="grid-row">
         <label>Lugar de recuento:</label>
-        <input type="text" id="lugarRecuento" placeholder="Ciudad / Oficina / Sede">
+        <select id="lugarRecuento">
+            <option value="">Seleccione lugar...</option>
+            <option value="Central A.T.B">Central A.T.B</option>
+            <option value="Sucursal Calama">Sucursal Calama</option>
+        </select>
     </div>
 
     <!-- Detalle del Recuento -->
@@ -253,10 +257,6 @@
     <div class="grid-row">
         <label>Importe total en literal:</label>
         <input type="text" id="importeLiteral" placeholder="Se completará automáticamente" readonly style="background-color: #e9ecef;">
-    </div>
-    <div class="grid-row">
-        <label>Destino de los fondos:</label>
-        <input type="text" id="destinoFondos" value="Recaudación de la telemaratón">
     </div>
     <div class="grid-row">
         <label>Observaciones:</label>
@@ -287,8 +287,13 @@
         <div class="signature-box">
             <h4>Validador del Recuento</h4>
             <div class="signature-field">
-                <label style="font-size: 0.75rem;">Nombre / Firma:</label>
-                <input type="text" id="validadorRecuento" placeholder="Nombre del validador">
+                <label style="font-size: 0.75rem;">Usuario:</label>
+                <select id="validadorRecuento">
+                    <option value="">Seleccione validador...</option>
+                    <option value="Usuario 1">Usuario 1</option>
+                    <option value="Usuario 2">Usuario 2</option>
+                    <option value="Usuario 3">Usuario 3</option>
+                </select>
             </div>
         </div>
     </div>
@@ -361,7 +366,7 @@
 
 <script>
     // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT (terminada en /exec)
-    const GOOGLE_SCRIPT_URL ="https://script.google.com/macros/s/AKfycbwAAOLNB2qC932AZiEDee7MaZvdbpw1ipb9YvTBKsMAW8BxcvXzwIe9EAsZhpgneAEY/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAAOLNB2qC932AZiEDee7MaZvdbpw1ipb9YvTBKsMAW8BxcvXzwIe9EAsZhpgneAEY/exec";
 
     const denominaciones = [0.10, 0.20, 0.50, 1.00, 2.00, 5.00, 10.00, 20.00, 50.00, 100.00, 200.00];
     const tbody = document.getElementById('tablaDenominaciones');
@@ -408,7 +413,6 @@
             codigoAlcancia: document.getElementById('codigoAlcancia').value,
             fechaRecuento: document.getElementById('fechaRecuento').value,
             lugarRecuento: document.getElementById('lugarRecuento').value,
-            destinoFondos: document.getElementById('destinoFondos').value,
             observaciones: document.getElementById('observaciones').value,
             responsableRecuento: document.getElementById('responsableRecuento').value,
             validadorRecuento: document.getElementById('validadorRecuento').value,
@@ -426,7 +430,6 @@
         document.getElementById('codigoAlcancia').value = datos.codigoAlcancia || '';
         if (datos.fechaRecuento) document.getElementById('fechaRecuento').value = datos.fechaRecuento;
         document.getElementById('lugarRecuento').value = datos.lugarRecuento || '';
-        document.getElementById('destinoFondos').value = datos.destinoFondos || 'Recaudación de la telemaratón';
         document.getElementById('observaciones').value = datos.observaciones || '';
         document.getElementById('responsableRecuento').value = datos.responsableRecuento || '';
         document.getElementById('validadorRecuento').value = datos.validadorRecuento || '';
@@ -441,9 +444,11 @@
     function limpiarFormularioSinConfirmar() {
         localStorage.removeItem('borradorRecuento');
         document.querySelectorAll('input[type="text"], textarea, .cantidad').forEach(el => {
-            if (el.id !== 'destinoFondos' && el.id !== 'importeLiteral') el.value = '';
+            if (el.id !== 'importeLiteral') el.value = '';
         });
+        document.getElementById('lugarRecuento').value = '';
         document.getElementById('responsableRecuento').value = '';
+        document.getElementById('validadorRecuento').value = '';
         document.getElementById('fechaRecuento').valueAsDate = new Date();
         calcularTotales();
     }
@@ -525,7 +530,7 @@
             });
 
             limpiarFormularioSinConfirmar();
-            await cargarHistorialDesdeNube(); // Sincroniza y muestra los datos nuevos inmediatamente
+            await cargarHistorialDesdeNube();
 
             Swal.fire('¡Registrado!', `La alcancía ${codigo} se guardó correctamente en Google Sheets.`, 'success');
         } catch (error) {
@@ -698,7 +703,9 @@
     }
 
     document.querySelector('.container').addEventListener('input', guardarBorradorActual);
+    document.getElementById('lugarRecuento').addEventListener('change', guardarBorradorActual);
     document.getElementById('responsableRecuento').addEventListener('change', guardarBorradorActual);
+    document.getElementById('validadorRecuento').addEventListener('change', guardarBorradorActual);
     
     window.addEventListener('DOMContentLoaded', () => {
         cargarBorradorActual();
